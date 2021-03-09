@@ -1,6 +1,6 @@
 # gercli
 
-A command line interface for gerrit.
+A command line interface to gerrit.
 
 ## Functionality
 
