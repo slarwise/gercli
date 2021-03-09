@@ -37,7 +37,8 @@ optional arguments:
   -p PATCH_SET, --patch-set PATCH_SET
 ```
 
-```gercli change
+```
+gercli change
 usage: gercli change [-h] [-u USER] [-s SERVER]
 
 optional arguments:
