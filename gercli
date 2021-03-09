@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+
+import argparse
+import configparser
+import sys
+import os.path
+import threads
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    subparsers = parser.add_subparsers(dest='sub command {thread,change}',
+            required=True)
+
+    thread_parser = subparsers.add_parser('thread',
+            help='Print comment threads')
+    thread_parser.add_argument('-u', '--user',
+            help='User and password separated by a comma <user>:password')
+    thread_parser.add_argument('-s', '--server')
+    thread_parser.add_argument('-c', '--change-id', type=int)
+    thread_parser.add_argument('-d', '--done', action='store_true')
+    thread_parser.add_argument('-n', '--not-done', action='store_true')
+    thread_parser.add_argument('-p', '--patch-set', type=int)
+    thread_parser.set_defaults(func=thread)
+
+    change_parser = subparsers.add_parser('change', help='Print changes')
+    change_parser.add_argument('-u', '--user',
+            help='User and password separated by a comma <user>:password')
+    change_parser.add_argument('-s', '--server')
+    change_parser.set_defaults(func=change)
+
+    args = parser.parse_args()
+    config = configparser.ConfigParser()
+    config.read(['.gerrit', os.path.expanduser('~/gerrit.ini')])
+    defaults = config.defaults()
+
+    if args.user:
+        user, _, password = args.user.partition(':')
+        if not password:
+            sys.exit('The --user option must be of the form <user>:<password>')
+    else:
+        if 'user' in defaults and 'password' in defaults:
+            user, password = defaults['user'], defaults['password']
+        else:
+            sys.exit('User and password must be provided with the -u|--user option or in .gerrit')
+    args.user, args.password = user, password
+
+    if not args.server:
+        if 'server' in defaults:
+            args.server = defaults['server']
+        else:
+            sys.exit('Server must be provided with the -s|--server option or in .gerrit')
+
+    args.func(args, config)
+
+def thread(args, config):
+    if not args.change_id:
+        if config.has_option('thread', 'change_id'):
+            args.change_id = config.getint('thread', 'change_id')
+        else:
+            sys.exit('Change id must be provided with the -c|--change-id option or in .gerrit')
+    threads.main(args)
+
+def change(args, config):
+    print('Print all changes for the user')
+
+if __name__ == '__main__':
+    main()
