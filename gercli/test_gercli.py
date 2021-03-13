@@ -1,6 +1,6 @@
+from collections import namedtuple, deque
 import unittest
 import threads
-from collections import namedtuple, deque
 
 Comment = namedtuple('Comment', ['patch_set', 'date', 'author', 'parent', 'message'])
 Thread = namedtuple('Thread', ['filename', 'comments'])

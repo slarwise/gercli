@@ -1,14 +1,14 @@
-import base64
 from collections import namedtuple, deque
-import output
+import base64
 import json
 import requests
 from requests.auth import HTTPBasicAuth
+import output
 
 Thread = namedtuple('Thread', ['filename', 'comments'])
 
 def main(args):
-    request = make_request(args)
+    request = comment_request(args)
     threads = create_threads_from_request(request)
 
 def comment_request(args):
@@ -19,7 +19,7 @@ def file_content_request(args):
     # TODO
     url = args.server + '/changes/' + str(args.change_id) + '/revision/'
     pass
-    
+
 def make_json_request(url, args):
     r = requests.get(url, HTTPBasicAuth(args.user, args.password))
     text = r.text[len(")]}'"):]
@@ -64,23 +64,23 @@ def filter_threads(threads, args):
         threads = filter(lambda t: t.comments[-1]['message'] == 'Done', threads)
     if args.not_done:
         threads = filter(lambda t: t.comments[-1]['message'] != 'Done', threads)
-    if args.patch_set:
+    if args.patch_set is not None:
         threads = filter(lambda t: t.comments[0]['patch_set'] == args.patch_set, threads)
     return list(threads)
 
 def create_thread_output(thread):
     indent = ' ' * 4
     thread_str = []
-    patch_set_str = output.Yellow + 'PS' + str(thread.comments[0]['patch_set']) + ' ' + output.END
-    filename_str = output.Yellow + thread.filename + output.END
+    patch_set_str = output.YELLOW + 'PS' + str(thread.comments[0]['patch_set']) + ' ' + output.END
+    filename_str = output.YELLOW + thread.filename + output.END
     thread_str.append(patch_set_str + filename_str)
     date = ''
     for c in thread.comments:
         if c['updated'][:10] != date:
             date = c['updated'][:10]
-            date_str = output.Blue + date + output.END
+            date_str = output.BLUE + date + output.END
             thread_str.append(indent + date_str)
-        message_str = output.Italic + c['message'] + output.END
+        message_str = output.ITALIC + c['message'] + output.END
         comment_str = indent + c['author']['name'] + ': ' + message_str
         thread_str.append(comment_str)
     return '\n'.join(thread_str)
