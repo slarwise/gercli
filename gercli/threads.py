@@ -33,8 +33,7 @@ def create_threads_from_request(request):
     threads = []
     for filename, comment_list in request.items():
         comments = create_comment_dict(comment_list)
-        for t in create_file_threads(filename, comments):
-            threads.append(t)
+        [threads.append(t) for t in create_file_threads(filename, comments)]
     return threads
 
 def create_comment_dict(comment_list):
@@ -51,7 +50,7 @@ def create_file_threads(filename, comments):
         return Thread(filename, thread_comments)
 
     last_comments = find_last_comments(comments)
-    return list(map(create_thread, last_comments))
+    return [create_thread(c) for c in last_comments]
 
 def find_last_comments(comments):
     replied_to_comment_ids = {c['in_reply_to'] for c in comments.values() if 'in_reply_to' in c}
