@@ -99,7 +99,7 @@ class TestThreads(unittest.TestCase):
                 Thread(filename, deque([comments['TfYX-Iuo'], comments['TveXwFiA']])),
                 ]
         actual = threads.create_file_threads(filename, comments)
-        self.assertEqual(len(actual), len(expected))
+        self.assertEqual(len(list(actual)), len(expected))
         for t_actual in actual:
             self.assertIn(t_actual, expected)
 
@@ -148,6 +148,20 @@ class TestThreads(unittest.TestCase):
                 ]
         Args = namedtuple('Args', ['done', 'not_done', 'patch_set'])
         args = Args(False, False, 1)
+        actual = threads.filter_threads(ts, args)
+        expected = [ts[0]] + [ts[2]]
+        self.assertEqual(len(actual), len(expected))
+        for t_actual in actual:
+            self.assertIn(t_actual, expected)
+
+    def test_filter_threads_patch_set_and_done(self):
+        ts = [
+                Thread('file.py', deque([request['file.py'][0]])),
+                Thread('file.py', deque(request['file.py'][1:])),
+                Thread('file2.py', deque(request['file2.py'])),
+                ]
+        Args = namedtuple('Args', ['done', 'not_done', 'patch_set'])
+        args = Args(False, True, 1)
         actual = threads.filter_threads(ts, args)
         expected = [ts[0]] + [ts[2]]
         self.assertEqual(len(actual), len(expected))

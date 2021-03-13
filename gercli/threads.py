@@ -50,21 +50,21 @@ def create_file_threads(filename, comments):
         return Thread(filename, thread_comments)
 
     last_comments = find_last_comments(comments)
-    return [create_thread(c) for c in last_comments]
+    return (create_thread(c) for c in last_comments)
 
 def find_last_comments(comments):
     replied_to_comment_ids = {c['in_reply_to'] for c in comments.values() if 'in_reply_to' in c}
     all_ids = set(comments.keys())
     last_comment_ids = all_ids.difference(replied_to_comment_ids)
-    return [comments[c_id] for c_id in last_comment_ids]
+    return (comments[c_id] for c_id in last_comment_ids)
 
 def filter_threads(threads, args):
     if args.done:
-        threads = filter(lambda t: t.comments[-1]['message'] == 'Done', threads)
+        threads = (t for t in threads if t.comments[-1]['message'] == 'Done')
     if args.not_done:
-        threads = filter(lambda t: t.comments[-1]['message'] != 'Done', threads)
+        threads = (t for t in threads if t.comments[-1]['message'] != 'Done')
     if args.patch_set is not None:
-        threads = filter(lambda t: t.comments[0]['patch_set'] == args.patch_set, threads)
+        threads = (t for t in threads if t.comments[0]['patch_set'] == args.patch_set)
     return list(threads)
 
 def create_thread_output(thread):
