@@ -7,6 +7,10 @@ A command line interface to gerrit.
 - List and filter comment threads for a change-id
 - List and filter changes
 
+## Installation
+
+Run `make install` to install the required modules.
+
 ## Usage
 
 The gercli program takes two sub commands, `threads` and `changes`. Run `gercli
