@@ -1,9 +1,0 @@
-[DEFAULT]
-user = arvid
-password = secret
-server = www.hej.com
-
-[thread]
-change_id = 123
-
-# vim: ft=dosini
