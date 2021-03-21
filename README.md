@@ -16,7 +16,7 @@ Run `make install` to install the required modules.
 The gercli program takes two sub commands, `threads` and `changes`. Run `gercli
 <sub command> -h` for all available options.
 
-Options can be specified on the command line or in a `~/.config/gercli`. See the
+Options can be specified on the command line or in `~/.config/gercli`. See the
 config file section for the syntax. Command line options override the options
 specified in the config file. The `user`, `password` and `server` options must
 always be given, either on the command line or in the config file.
@@ -37,12 +37,20 @@ change id 123.
 gercli threads -c 123 -p 2
 ```
 
+This command will list all comment threads from the change with change id 123
+that are not marked as done.
+
+```sh
+gercli threads -c 123 -n
+```
+
 ## Config file
 
-The config file is divided into three sections, one for default options and one
-for each sub command. The syntax is similar INI files where sections are
+The config file is divided into three sections, one for the default options and
+one for each sub command. The syntax is similar INI files where sections are
 surrounded with square brackets and the options and values are specified as
-`option = value`. The config file will look something like this: 
+`option = value`. Both optional and required options can be specified. The
+config file will look something like this: 
 
 ```dosini
 [DEFAULT]
