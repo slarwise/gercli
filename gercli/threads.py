@@ -2,7 +2,7 @@ from collections import namedtuple, deque
 import gerritrequests
 import output
 
-Thread = namedtuple('Thread', ['filename', 'comments'])
+Thread = namedtuple('Thread', ['filename', 'context', 'comments'])
 
 def main(args):
     requester = gerritrequests.GerritRequester(args.user, args.password, args.server)
@@ -26,14 +26,40 @@ def create_file_threads(filename, comments):
 
     def create_thread(last_comment):
         thread_comments = deque([last_comment])
-        c = last_comment
-        while 'in_reply_to' in c:
-            c = comments[c['in_reply_to']]
-            thread_comments.appendleft(c)
-        return Thread(filename, thread_comments)
+        comment = last_comment
+        if isinstance(file_contents, dict):
+            context = create_context(comment, file_contents[comment['patch_set']])
+        else:
+            context = create_context(comment, file_contents)
+        while 'in_reply_to' in comment:
+            comment = comments[comment['in_reply_to']]
+            thread_comments.appendleft(comment)
+        return Thread(filename, context, thread_comments)
 
     last_comments = find_last_comments(comments)
     return (create_thread(c) for c in last_comments)
+
+def create_context(comment, file_contents):
+    if 'range' in comment:
+        start_line = comment['range']['start_line'] - 1
+        end_line = comment['range']['end_line'] - 1
+        start_character = comment['range']['start_character']
+        end_character = comment['range']['end_character']
+        start = file_contents[start_line][:start_character]
+        if start_line == end_line:
+            highlighted = file_contents[start_line][start_character:end_character]
+        else:
+            highlighted = (file_contents[start_line][start_character:]
+                    + '\n'.join(file_contents[start_line+1:end_line])
+                    + file_contents[end_line][:end_character]
+                    )
+        end = file_contents[end_line][end_character:]
+    elif 'line' in comment:
+        start, end = ('',)*2
+        highlighted = file_contents[comment['line']-1]
+    else:
+        start, highlighted, end = ('',)*3
+    return {'start': start, 'highlighted': highlighted, 'end': end}
 
 def find_last_comments(comments):
     replied_to_comment_ids = {c['in_reply_to'] for c in comments.values() if 'in_reply_to' in c}
