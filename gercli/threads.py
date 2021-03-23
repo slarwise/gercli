@@ -75,6 +75,8 @@ def find_last_comments(comments):
     return (comments[c_id] for c_id in last_comment_ids)
 
 def filter_threads(threads, args):
+    if args.author is not None:
+        threads = (t for t in threads if any((args.author.lower() in c['author']['name'].lower() for c in t.comments)))
     if args.done:
         threads = (t for t in threads if t.comments[-1]['message'] == 'Done')
     if args.not_done:
