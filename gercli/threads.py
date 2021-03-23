@@ -14,16 +14,23 @@ def main(args):
 
 def create_threads_from_request(args, requester, request):
     threads = []
-    for filename, comment_list in request.items():
-        comments = create_comment_dict(comment_list)
-        [threads.append(t) for t in create_file_threads(filename, comments)]
+    if args.filename:
+        filenames = [f for f in request.keys() if args.filename.lower() in f.lower()]
+    else:
+        filenames = request.keys()
+    for filename in filenames:
+        comments = {c['id']: c for c in request[filename]}
+        if args.patch_set is None:
+            patch_sets = {c['patch_set'] for c in comments.values()}
+            file_contents = {p: requester.file_content_request(args.change_id, p, filename) for p in patch_sets}
+        else:
+            file_contents = requester.file_content_request(args.change_id, args.patch_set, filename)
+            for c in comments.values():
+                c['patch_set'] = args.patch_set if args.patch_set > 0 else '-latest'
+        threads += create_file_threads(args, filename, comments, file_contents)
     return threads
 
-def create_comment_dict(comment_list):
-    return {c['id']: c for c in comment_list}
-
-def create_file_threads(filename, comments):
-
+def create_file_threads(args, filename, comments, file_contents):
     def create_thread(last_comment):
         thread_comments = deque([last_comment])
         comment = last_comment
