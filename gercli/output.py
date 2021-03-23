@@ -1,5 +1,3 @@
-END = '\x1b[0m'
-
 BLACK         = '\x1b[' + str(38) + ';5;' + '0' + 'm'
 RED           = '\x1b[' + str(38) + ';5;' + '1' + 'm'
 GREEN         = '\x1b[' + str(38) + ';5;' + '2' + 'm'
@@ -24,15 +22,69 @@ UNDERLINED       = "\x1b[4m"
 BLINK            = "\x1b[5m"
 REVERSE          = "\x1b[7m"
 HIDDEN           = "\x1b[8m"
-# Reset formatting
-RESET            = "\x1b[0m"
-RESET_BOLD       = "\x1b[21m"
-RESET_DIM        = "\x1b[22m"
-RESET_ITALIC     = "\x1b[23m"
-RESET_UNDERLINED = "\x1b[24"
-RESET_BLINK      = "\x1b[25m"
-RESET_REVERSE    = "\x1b[27m"
-RESET_HIDDEN     = "\x1b[28m"
 
-def surround_str(string, escape_code):
-    return escape_code + string + END
+END = '\x1b[0m'
+
+def surround_str(string, format_codes):
+    return ''.join(format_codes) + string + END
+
+def print_changes(changes, stat):
+    if len(changes) == 0:
+        if stat:
+            print('0 changes')
+        return
+    longest_status = max((len(c['status']) for c in changes))
+    change_outputs = (create_change_output(c, longest_status) for c in changes)
+    print('\n'.join(change_outputs))
+    if stat:
+        print('{n_changes} changes'.format(n_changes=len(changes)))
+
+def create_change_output(change, longest_status):
+    return '{change_id} {status} {subject}'.format(
+            change_id=surround_str(str(change['_number']), [YELLOW]),
+            status=surround_str(('{:<' + str(longest_status+1) + '}').format(change['status']), [MAGENTA]),
+            subject=surround_str(change['subject'], []),
+            )
+
+def print_threads(threads, stat):
+    indent = ' ' * 4
+    thread_outputs = (create_thread_output(t, indent) for t in threads)
+    if len(threads) > 0:
+        print('\n\n'.join(thread_outputs))
+    if stat:
+        print('{n_threads} threads'.format(n_threads=len(threads)))
+
+def create_thread_output(thread, indent):
+    lines = []
+
+    header = '{patch_set} {filename}'.format(
+            patch_set=surround_str('PS' + str(thread.comments[0]['patch_set']), [YELLOW]),
+            filename=surround_str(thread.filename, [YELLOW]),
+            )
+    lines.append(header)
+
+    context = '{start}{highlighted}{end}'.format(
+            start=surround_str(thread.context['start'], []),
+            highlighted=surround_str(thread.context['highlighted'], [GREEN, ITALIC]),
+            end=surround_str(thread.context['end'], []),
+            )
+    lines.append(context)
+
+    date = ''
+    for comment in thread.comments:
+        if get_comment_date(comment) != date:
+            date = get_comment_date(comment)
+            lines.append('{indent}{date}'.format(
+                indent=indent,
+                date=surround_str(date, [BLUE]),
+                ))
+        lines.append('{indent}{author} {message}'.format(
+            indent=indent,
+            author=surround_str(comment['author']['name'], []),
+            message=surround_str(comment['message'], [GREEN, ITALIC]),
+            ))
+
+    return '\n'.join(lines)
+
+def get_comment_date(comment):
+    return comment['updated'][:10]
