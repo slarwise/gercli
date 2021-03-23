@@ -81,8 +81,6 @@ def filter_threads(threads, args):
         threads = (t for t in threads if t.comments[-1]['message'] == 'Done')
     if args.not_done:
         threads = (t for t in threads if t.comments[-1]['message'] != 'Done')
-    if args.patch_set is not None:
-        threads = (t for t in threads if t.comments[0]['patch_set'] == args.patch_set)
     return list(threads)
 
 def sort_threads(threads, args):
