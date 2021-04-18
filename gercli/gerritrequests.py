@@ -6,13 +6,13 @@ import requests
 class GerritRequester():
 
     def __init__(self, user, password, server):
-        self.user = user
-        self.password = password
+        self.session = requests.Session()
+        self.session.auth = HTTPDigestAuth(user, password)
         self.server = server
 
     def change_request(self, query_params):
         url = '{server}/a/changes/'.format(server=self.server)
-        r = requests.get(url, params=query_params, auth=HTTPDigestAuth(self.user, self.password))
+        r = self.session.get(url, params=query_params)
         result = parse_json(r.text)
         return [change for changes in result for change in changes]
 
@@ -28,7 +28,7 @@ class GerritRequester():
                     server=self.server,
                     change_id=str(change_id),
                     )
-        r = requests.get(url, auth=HTTPDigestAuth(self.user, self.password))
+        r = self.session.get(url)
         return parse_json(r.text)
 
     def file_content_request(self, change_id, patch_set, filename):
@@ -38,7 +38,7 @@ class GerritRequester():
                 patch_set=str(patch_set) if patch_set > 0 else 'current',
                 filename=filename.replace('/', '%2F'),
                 )
-        r = requests.get(url, auth=HTTPDigestAuth(self.user, self.password))
+        r = self.session.get(url)
         utf8_str = (base64.standard_b64decode(r.text)).decode('utf-8')
         file_contents = utf8_str.split('\n')
         if filename == '/COMMIT_MSG':
