@@ -40,9 +40,10 @@ def print_changes(changes, stat):
         print('{n_changes} changes'.format(n_changes=len(changes)))
 
 def create_change_output(change, longest_status):
-    return '{change_id} {status} {subject}'.format(
+    return '{change_id} {status} {updated} {subject}'.format(
             change_id=surround_str(str(change['_number']), [YELLOW]),
-            status=surround_str(('{:<' + str(longest_status+1) + '}').format(change['status']), [MAGENTA]),
+            status=surround_str(('{:<' + str(longest_status) + '}').format(change['status']), [MAGENTA]),
+            updated=surround_str(get_change_datetime(change), [ITALIC]),
             subject=surround_str(change['subject'], []),
             )
 
@@ -85,6 +86,9 @@ def create_thread_output(thread, indent):
             ))
 
     return '\n'.join(lines)
+
+def get_change_datetime(change):
+    return change['updated'][:19]
 
 def get_comment_date(comment):
     return comment['updated'][:10]
