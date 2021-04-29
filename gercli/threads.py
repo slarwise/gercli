@@ -1,6 +1,6 @@
 from collections import namedtuple, deque
 import gerritrequests
-import output
+import ansi
 
 Thread = namedtuple('Thread', ['filename', 'context', 'comments'])
 
@@ -10,7 +10,7 @@ def main(args):
     threads = create_threads_from_request(args, requester, request)
     threads = filter_threads(threads, args)
     threads = sort_threads(threads, args)
-    output.print_threads(threads, args.stat)
+    print_threads(threads, args.stat)
 
 def create_threads_from_request(args, requester, request):
     threads = []
@@ -88,3 +88,52 @@ def sort_threads(threads, args):
         return sorted(threads, key=lambda thread: thread.comments[0]['patch_set'])
     else:
         return threads
+
+def print_threads(threads, stat):
+    indent = ' ' * 4
+    thread_outputs = (create_thread_output(t, indent) for t in threads)
+    if len(threads) > 0:
+        print('\n\n'.join(thread_outputs))
+    if stat:
+        print('{n_threads} threads'.format(n_threads=len(threads)))
+
+def create_thread_output(thread, indent):
+    lines = []
+
+    header = '{patch_set} {filename}'.format(
+            patch_set=ansi.format(
+                'PS' + str(thread.comments[0]['patch_set']), [ansi.YELLOW]
+                ),
+            filename=ansi.format(thread.filename, [ansi.YELLOW]),
+            )
+    lines.append(header)
+
+    context = '{start}{highlighted}{end}'.format(
+            start=ansi.format(thread.context['start'], []),
+            highlighted=ansi.format(
+                thread.context['highlighted'], [ansi.GREEN, ansi.ITALIC]
+                ),
+            end=ansi.format(thread.context['end'], []),
+            )
+    lines.append(context)
+
+    date = ''
+    for comment in thread.comments:
+        if get_date(comment) != date:
+            date = get_date(comment)
+            lines.append('{indent}{date}'.format(
+                indent=indent,
+                date=ansi.format(date, [ansi.BLUE]),
+                ))
+        lines.append('{indent}{author} {message}'.format(
+            indent=indent,
+            author=ansi.format(comment['author']['name'], []),
+            message=ansi.format(
+                comment['message'], [ansi.GREEN, ansi.ITALIC]
+                ),
+            ))
+
+    return '\n'.join(lines)
+
+def get_date(comment):
+    return comment['updated'][:10]
