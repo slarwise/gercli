@@ -25,5 +25,5 @@ HIDDEN     = "\x1b[8m"
 
 END = '\x1b[0m'
 
-def format(string, format_codes):
-    return ''.join(format_codes) + string + END
+def format(item, format_codes):
+    return ''.join(format_codes) + str(item) + END
