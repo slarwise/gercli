@@ -10,7 +10,9 @@ class GerritRequester():
         self.session.auth = HTTPDigestAuth(config.user, config.password)
         self.server = config.server
         self.patch_set = getattr(config, 'patch_set', None)
-        self.filename = getattr(config, 'filename', None)
+        if self.patch_set == -1:
+            self.patch_set = 'current'
+        self.filename_pattern = getattr(config, 'filename', None)
         self.change_id = getattr(config, 'change_id', None)
 
     def change_request(self, query_params):
@@ -22,16 +24,13 @@ class GerritRequester():
 
     def comment_request(self):
         if self.patch_set is not None:
-            url = '{server}/a/changes/{change_id}/revisions/{patch_set}/comments'.format(
-                    server=self.server,
-                    change_id=str(self.change_id),
-                    patch_set=str(self.patch_set) if self.patch_set > 0 else 'current',
-                    )
+            url = ''.join([
+                    f'{self.server}/a/changes/',
+                    f'{self.change_id}/revisions/',
+                    f'{self.patch_set}/comments',
+                    ])
         else:
-            url = '{server}/a/changes/{change_id}/comments'.format(
-                    server=self.server,
-                    change_id=str(self.change_id),
-                    )
+            url = f'{self.server}/a/changes/{self.change_id}/comments'
         r = self.session.get(url)
         data = parse_json(r.text)
 
@@ -47,12 +46,12 @@ class GerritRequester():
         return data
 
     def file_content_request(self, filename, patch_set):
-        url = '{server}/a/changes/{change_id}/revisions/{patch_set}/files/{filename}/content'.format(
-                server=self.server,
-                change_id=str(self.change_id),
-                patch_set=str(patch_set) if patch_set > 0 else 'current',
-                filename=filename.replace('/', '%2F'),
-                )
+        url = ''.join([
+            f'{self.server}/a/changes/',
+            f'{self.change_id}/revisions/',
+            f'{patch_set}/files/',
+            f'{filename.replace("/", "%2F")}/content',
+            ])
         r = self.session.get(url)
         utf8_str = (base64.standard_b64decode(r.text)).decode('utf-8')
         file_contents = utf8_str.split('\n')
