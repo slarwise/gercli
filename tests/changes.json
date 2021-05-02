@@ -1,0 +1,18 @@
+[
+  {
+    "_number": 23,
+    "status": "open",
+    "updated": "2021-04-28 21:20:45.1234",
+    "subject": "Fascinating subject",
+    "current_revision": "1234",
+    "revisions": {"1234": {"_number": 3}}
+  },
+  {
+    "_number": 42,
+    "status": "closed",
+    "updated": "2021-04-29 08:03:45.1234",
+    "subject": "yee-yee!",
+    "current_revision": "321",
+    "revisions": {"321": {"_number": 5}}
+  }
+]

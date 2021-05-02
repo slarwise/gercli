@@ -1,0 +1,61 @@
+{
+  "file1": [
+    {
+      "id": "1",
+      "patch_set": "3",
+      "range": {
+        "start_line": 1,
+        "end_line": 4,
+        "start_character": 5,
+        "end_character": 4
+      },
+      "author": {"name": "Name1"},
+      "message": "Can you update this, Name2?",
+      "updated": "2021-04-27 21:20:45.1234"
+    },
+    {
+      "id": "2",
+      "patch_set": "3",
+      "range": {
+        "start_line": 1,
+        "end_line": 4,
+        "start_character": 5,
+        "end_character": 4
+      },
+      "in_reply_to": "1",
+      "author": {"name": "Name2"},
+      "message": "Done",
+      "updated": "2021-04-28 21:20:45.1234"
+    },
+    {
+      "id": "3",
+      "patch_set": "2",
+      "line": 3,
+      "author": {"name": "Name1"},
+      "message": "Yes",
+      "updated": "2021-04-26 21:20:45.1234"
+    }
+  ],
+  "file2": [
+    {
+      "id": "4",
+      "patch_set": "3",
+      "author": {"name": "Name1"},
+      "message": "A file comment",
+      "updated": "2021-04-24 21:20:45.1234"
+    },
+    {
+      "id": "5",
+      "patch_set": "3",
+      "range": {
+        "start_line": 1,
+        "end_line": 1,
+        "start_character": 5,
+        "end_character": 11
+      },
+      "author": {"name": "Name1"},
+      "message": "A comment with a one line range",
+      "updated": "2021-04-24 21:20:45.1234"
+    }
+  ]
+}

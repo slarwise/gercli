@@ -26,4 +26,7 @@ HIDDEN     = "\x1b[8m"
 END = '\x1b[0m'
 
 def format(item, format_codes):
-    return ''.join(format_codes) + str(item) + END
+    if format_codes:
+        return ''.join(format_codes) + str(item) + END
+    else:
+        return str(item)
