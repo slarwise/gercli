@@ -9,15 +9,9 @@ class GerritRequester():
         self.session = requests.Session()
         self.session.auth = HTTPDigestAuth(config.user, config.password)
         self.server = config.server
-        if hasattr(config, 'patch_set'):
-            if config.patch_set is not None:
-                self.patch_set = config.patch_set
-        if hasattr(config, 'filename'):
-            if config.filename is not None:
-                self.filename_pattern = config.filename
-        if hasattr(config, 'change_id'):
-            if config.change_id is not None:
-                self.change_id = config.change_id
+        self.patch_set = getattr(config, 'patch_set', None)
+        self.filename = getattr(config, 'filename', None)
+        self.change_id = getattr(config, 'change_id', None)
 
     def change_request(self, query_params):
         url = '{server}/a/changes/'.format(server=self.server)
@@ -27,7 +21,7 @@ class GerritRequester():
         return [change for changes in result for change in changes]
 
     def comment_request(self):
-        if hasattr(self, 'patch_set'):
+        if self.patch_set is not None:
             url = '{server}/a/changes/{change_id}/revisions/{patch_set}/comments'.format(
                     server=self.server,
                     change_id=str(self.change_id),
@@ -40,15 +34,17 @@ class GerritRequester():
                     )
         r = self.session.get(url)
         data = parse_json(r.text)
-        if hasattr(self, 'filename_pattern'):
+
+        if self.filename_pattern is not None:
             for filename in list(data.keys()):
                 if self.filename_pattern.lower() not in filename.lower():
                     del data[filename]
 
-        if hasattr(self, 'patch_set'):
+        if self.patch_set is not None:
             for comment_list in data.values():
                 for comment in comment_list:
                     comment['patch_set'] = self.patch_set
+
         return data
 
     def file_content_request(self, filename, patch_set):
