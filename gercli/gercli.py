@@ -23,7 +23,7 @@ def main():
     thread_parser.add_argument('-n', '--not-done', action='store_true',
             help='Only print threads where the last comment is not "Done"')
     thread_parser.add_argument('-p', '--patch-set', type=int,
-            help='Only print threads from patch set PATCH_SET. -1 gives the latest patch set.')
+            help='Only print threads from patch set PATCH_SET. -1 gives the current patch set.')
     thread_parser.add_argument('-f', '--filename',
             help='Only print threads where FILENAME is in filename (case insensitive)')
     thread_parser.add_argument('-a', '--author',
