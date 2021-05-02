@@ -36,9 +36,8 @@ class GerritRequester():
         data = parse_json(r.text)
 
         if self.filename_pattern is not None:
-            for filename in list(data.keys()):
-                if self.filename_pattern.lower() not in filename.lower():
-                    del data[filename]
+            data = {filename: comments for filename, comments in data.items()
+                    if self.filename_pattern.lower() in filename.lower()}
 
         if self.patch_set is not None:
             for comment_list in data.values():
